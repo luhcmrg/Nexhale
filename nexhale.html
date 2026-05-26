@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexhale – Apoio para dependentes em nicotina</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --purple: #6B21C8;
+    --purple-light: #EDE9F8;
+    --purple-mid: #A78BDA;
+    --green: #22C55E;
+    --orange: #F97316;
+    --red: #EF4444;
+    --text: #1A1A2E;
+    --text-secondary: #6B7280;
+    --bg: #F8F7FC;
+    --white: #FFFFFF;
+    --card: #FFFFFF;
+    --border: #E9E3F5;
+    --gold: #EAB308;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #ECEAF4;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  /* ---- PHONE SHELL ---- */
+  .phone {
+    width: 390px;
+    min-height: 844px;
+    background: var(--bg);
+    border-radius: 44px;
+    overflow: hidden;
+    box-shadow: 0 32px 80px rgba(107,33,200,0.18), 0 2px 8px rgba(0,0,0,0.08);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---- SCREENS ---- */
+  .screen { display: none; flex-direction: column; min-height: 844px; }
+  .screen.active { display: flex; }
+
+  /* ---- HEADER ---- */
+  .header {
+    background: var(--purple);
+    padding: 54px 28px 36px;
+    color: white;
+    position: relative;
+  }
+  .header-wave {
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 32px;
+    background: var(--bg);
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  }
+  .header-inner { position: relative; z-index: 1; }
+  .header h1 { font-family: 'DM Serif Display', serif; font-size: 32px; font-weight: 400; letter-spacing: -0.5px; }
+  .header p { font-size: 13px; opacity: 0.82; margin-top: 4px; font-weight: 300; }
+  .header-back { display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 12px; opacity: 0.9; font-size: 14px; }
+  .header-back svg { width: 18px; height: 18px; }
+
+  /* ---- CONTENT AREA ---- */
+  .content { flex: 1; padding: 24px 20px; overflow-y: auto; }
+  .content-with-nav { padding-bottom: 80px; }
+
+  /* ---- BOTTOM NAV ---- */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    width: 390px;
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 12px 0 16px;
+    z-index: 100;
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    cursor: pointer; padding: 4px 12px; border-radius: 12px;
+    transition: background 0.15s;
+  }
+  .nav-item:hover { background: var(--purple-light); }
+  .nav-item svg { width: 22px; height: 22px; stroke: var(--text-secondary); fill: none; stroke-width: 1.8; transition: stroke 0.15s; }
+  .nav-item.active svg { stroke: var(--purple); }
+  .nav-item span { font-size: 10px; color: var(--text-secondary); }
+  .nav-item.active span { color: var(--purple); font-weight: 600; }
+
+  /* ---- CARDS ---- */
+  .card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 14px;
+    border: 1px solid var(--border);
+  }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; }
+
+  /* ---- BUTTONS ---- */
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--purple);
+    color: white; font-size: 15px; font-weight: 600;
+    padding: 15px 24px; border-radius: 14px;
+    border: none; cursor: pointer; width: 100%;
+    transition: opacity 0.15s, transform 0.1s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn:hover { opacity: 0.9; }
+  .btn:active { transform: scale(0.98); }
+  .btn-outline {
+    background: transparent; border: 1.5px solid var(--purple); color: var(--purple);
+  }
+  .btn-sm { padding: 10px 18px; font-size: 13px; border-radius: 10px; width: auto; }
+  .btn-danger { background: var(--red); }
+
+  /* ---- INPUT ---- */
+  .input-group { margin-bottom: 12px; }
+  .input-group input {
+    width: 100%; padding: 14px 16px;
+    border: 1.5px solid var(--border); border-radius: 12px;
+    font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text);
+    background: var(--white); outline: none; transition: border 0.15s;
+  }
+  .input-group input:focus { border-color: var(--purple); }
+  .input-group input::placeholder { color: #B0A8C8; }
+
+  /* ---- PROGRESS BAR ---- */
+  .progress-wrap { background: #EEE; border-radius: 99px; height: 10px; overflow: hidden; margin: 8px 0 4px; }
+  .progress-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--green) 70%, var(--orange)); transition: width 0.6s ease; }
+  .progress-label { font-size: 12px; color: var(--text-secondary); text-align: center; }
+
+  /* ---- TAGS / BADGES ---- */
+  .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; }
+  .badge-green { background: #DCFCE7; color: #166534; }
+  .badge-orange { background: #FEF3C7; color: #92400E; }
+  .badge-purple { background: var(--purple-light); color: var(--purple); }
+
+  /* ---- GOAL ITEMS ---- */
+  .goal-option {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 18px; background: var(--white);
+    border: 1.5px solid var(--border); border-radius: 16px;
+    margin-bottom: 10px; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+  }
+  .goal-option:hover { border-color: var(--purple); background: var(--purple-light); }
+  .goal-option span { font-size: 15px; font-weight: 500; }
+  .goal-option .icon { font-size: 24px; }
+
+  /* ---- META STATUS ITEMS ---- */
+  .meta-status {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; border-radius: 14px; margin-bottom: 8px;
+    font-size: 14px; font-weight: 500; color: white;
+  }
+  .meta-green { background: var(--green); }
+  .meta-orange { background: var(--orange); }
+  .meta-purple { background: var(--purple); }
+
+  /* ---- TIP GRID ---- */
+  .tip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .tip-item {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px; cursor: pointer;
+    display: flex; flex-direction: column; gap: 6px;
+    transition: border-color 0.15s;
+  }
+  .tip-item:hover { border-color: var(--purple); }
+  .tip-item .tip-icon { font-size: 22px; }
+  .tip-item .tip-label { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.3; }
+  .tip-item .tip-sub { font-size: 11px; color: var(--text-secondary); }
+
+  /* ---- AJUDA CONTACTS ---- */
+  .contact-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px; background: var(--white); border: 1px solid var(--border);
+    border-radius: 14px; margin-bottom: 8px; cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .contact-item:hover { border-color: var(--purple); }
+  .contact-left { display: flex; align-items: center; gap: 12px; }
+  .contact-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; background: var(--purple-light); }
+  .contact-title { font-size: 14px; font-weight: 600; }
+  .contact-sub { font-size: 12px; color: var(--text-secondary); }
+
+  /* ---- JOGOS ---- */
+  .game-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px; background: var(--white); border: 1px solid var(--border);
+    border-radius: 14px; margin-bottom: 8px; cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .game-item:hover { border-color: var(--purple); }
+  .game-left { display: flex; align-items: center; gap: 12px; }
+  .game-icon { font-size: 28px; }
+  .game-info .game-name { font-size: 14px; font-weight: 600; }
+  .game-info .game-desc { font-size: 12px; color: var(--text-secondary); }
+  .game-points { background: var(--purple-light); color: var(--purple); font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 99px; }
+
+  /* ---- PANIC BUTTON ---- */
+  .panic-section { text-align: center; padding: 16px 0; }
+  .panic-btn {
+    width: 120px; height: 120px; border-radius: 50%;
+    background: linear-gradient(135deg, #EF4444, #DC2626);
+    border: 4px solid #FCA5A5; color: white;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    margin: 0 auto; box-shadow: 0 8px 32px rgba(239,68,68,0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .panic-btn:hover { transform: scale(1.05); box-shadow: 0 12px 40px rgba(239,68,68,0.45); }
+  .panic-btn:active { transform: scale(0.97); }
+  .panic-btn .panic-icon { font-size: 28px; }
+
+  /* ---- LINK ---- */
+  .link { color: var(--purple); font-weight: 600; cursor: pointer; text-decoration: none; }
+  .link:hover { text-decoration: underline; }
+
+  /* ---- SECTION TITLE ---- */
+  .section-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 12px; margin-top: 6px; }
+
+  /* ---- LOGIN CARD ---- */
+  .auth-card { background: var(--white); border-radius: 20px; padding: 24px 20px; border: 1px solid var(--border); margin-bottom: 24px; }
+  .auth-card h2 { font-family: 'DM Serif Display', serif; font-size: 26px; text-align: center; margin-bottom: 20px; color: var(--text); }
+
+  /* ---- HOME QUICK ACTIONS ---- */
+  .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .quick-item {
+    padding: 18px 16px; border-radius: 18px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--white);
+    display: flex; flex-direction: column; gap: 8px;
+    transition: border-color 0.15s;
+  }
+  .quick-item:hover { border-color: var(--purple); }
+  .quick-item .q-icon { font-size: 26px; }
+  .quick-item .q-title { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .quick-item .q-sub { font-size: 11px; color: var(--text-secondary); }
+
+  /* ---- ALERT / HIGHLIGHT ---- */
+  .highlight-card {
+    background: linear-gradient(135deg, var(--purple) 0%, #8B5CF6 100%);
+    border-radius: 20px; padding: 20px; color: white; margin-bottom: 14px;
+  }
+  .highlight-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .highlight-card p { font-size: 13px; opacity: 0.85; }
+
+  /* ---- DIVIDER ---- */
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+  /* ---- POINTS BAR ---- */
+  .points-wrap { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .points-num { font-size: 22px; font-weight: 700; color: var(--text); }
+  .points-crown { font-size: 20px; }
+
+  /* ---- TOAST / MODAL ---- */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+    z-index: 200; align-items: flex-end; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+  .modal-box {
+    background: var(--white); border-radius: 28px 28px 0 0;
+    padding: 28px 24px 36px; width: 390px;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 99px; margin: 0 auto 20px; }
+  .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .modal-sub { font-size: 14px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5; }
+
+  /* ---- BREATHING ANIMATION ---- */
+  .breath-circle {
+    width: 120px; height: 120px; border-radius: 50%;
+    background: var(--purple-light); border: 3px solid var(--purple-mid);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 12px; font-size: 13px; font-weight: 600; color: var(--purple);
+    animation: breathe 4s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); background: var(--purple-light); }
+    50% { transform: scale(1.25); background: #D8B4FE; }
+  }
+
+  /* ---- ONG PANEL ---- */
+  .ong-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 10px; }
+  .ong-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .ong-name { font-size: 15px; font-weight: 700; }
+  .ong-stat { text-align: center; }
+  .ong-stat .num { font-size: 22px; font-weight: 700; color: var(--purple); }
+  .ong-stat .lbl { font-size: 11px; color: var(--text-secondary); }
+  .ong-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
+
+  /* ---- SCROLLBAR ---- */
+  .content::-webkit-scrollbar { width: 4px; }
+  .content::-webkit-scrollbar-track { background: transparent; }
+  .content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  /* ---- ANIMATIONS ---- */
+  .screen.active .card, .screen.active .auth-card, .screen.active .quick-item,
+  .screen.active .goal-option, .screen.active .contact-item, .screen.active .game-item {
+    animation: fadeUp 0.3s ease both;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .screen.active .card:nth-child(2) { animation-delay: 0.05s; }
+  .screen.active .card:nth-child(3) { animation-delay: 0.1s; }
+
+  /* ---- ONG BUTTON (top right home) ---- */
+  .ong-toggle {
+    background: rgba(255,255,255,0.2); border: 1.5px solid rgba(255,255,255,0.4);
+    color: white; font-size: 11px; font-weight: 700;
+    padding: 6px 14px; border-radius: 99px; cursor: pointer;
+    backdrop-filter: blur(6px); font-family: 'DM Sans', sans-serif;
+    transition: background 0.15s; white-space: nowrap;
+  }
+  .ong-toggle:hover { background: rgba(255,255,255,0.3); }
+</style>
+</head>
+<body>
+
+<!-- ======================== PHONE ======================== -->
+<div class="phone">
+
+<!-- ===================== SCREEN: CADASTRO ===================== -->
+<div class="screen active" id="screen-cadastro">
+  <div class="header">
+    <div class="header-inner">
+      <h1>Nexhale</h1>
+      <p>Apoio para dependentes em nicotina</p>
+    </div>
+    <div class="header-wave"></div>
+  </div>
+  <div class="content">
+    <div class="auth-card">
+      <h2>Crie sua conta</h2>
+      <div class="input-group"><input type="text" placeholder="Nome completo"></div>
+      <div class="input-group"><input type="text" placeholder="Nome de usuário"></div>
+      <div class="input-group"><input type="password" placeholder="Senha"></div>
+      <div class="input-group"><input type="password" placeholder="Confirmar senha"></div>
+      <p style="text-align:center; font-size:13px; color:var(--text-secondary); margin-bottom:16px;">
+        Já possui uma conta? <span class="link" onclick="goTo('screen-login')">Entre</span>
+      </p>
+      <button class="btn" onclick="goTo('screen-home')">Criar Conta</button>
+    </div>
+  </div>
+  <div style="height:20px;"></div>
+</div>
+
+<!-- ===================== SCREEN: LOGIN ===================== -->
+<div class="screen" id="screen-login">
+  <div class="header">
+    <div class="header-inner">
+      <h1>Nexhale</h1>
+      <p>Apoio para dependentes em nicotina</p>
+    </div>
+    <div class="header-wave"></div>
+  </div>
+  <div class="content">
+    <div class="auth-card">
+      <h2>Bem-vindo</h2>
+      <div class="input-group"><input type="text" placeholder="Nome de usuário"></div>
+      <div class="input-group"><input type="password" placeholder="Senha"></div>
+      <p style="text-align:center; font-size:13px; color:var(--text-secondary); margin-bottom:16px;">
+        Não tem uma conta? <span class="link" onclick="goTo('screen-cadastro')">Registre-se</span>
+      </p>
+      <button class="btn" onclick="goTo('screen-home')">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN: HOME ===================== -->
+<div class="screen" id="screen-home">
+  <div class="header" style="padding-bottom:44px;">
+    <div class="header-inner">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <h1>Nexhale</h1>
+          <p>Apoio para dependentes em nicotina</p>
+        </div>
+        <button class="ong-toggle" onclick="goTo('screen-ong')" style="position:static; margin-top:4px; flex-shrink:0;">Painel ONG</button>
+      </div>
+    </div>
+    <div class="header-wave"></div>
+  </div>
+  <div class="content content-with-nav">
+    <!-- Progresso atual -->
+    <div class="card">
+      <div class="card-title">Meta atual</div>
+      <div style="font-size:16px; font-weight:700; margin-bottom:10px;">30 dias sem fumar</div>
+      <div class="progress-wrap"><div class="progress-fill" style="width:83%;"></div></div>
+      <div class="progress-label">25 / 30 dias</div>
+      <div style="margin-top:12px;">
+        <button class="btn" onclick="goTo('screen-metas')">＋ Ver minhas metas</button>
+      </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="quick-grid">
+      <div class="quick-item" onclick="goTo('screen-jogos')">
+        <div class="q-icon">🎮</div>
+        <div class="q-title">Jogue para se distrair</div>
+        <div class="q-sub">Jogos para se acalmar</div>
+      </div>
+      <div class="quick-item" onclick="goTo('screen-dicas')">
+        <div class="q-icon">🌿</div>
+        <div class="q-title">Dicas para ser saudável</div>
+        <div class="q-sub">Cuide do seu bem-estar</div>
+      </div>
+    </div>
+
+    <!-- Botão de pânico -->
+    <div class="card">
+      <div class="card-title">Sentiu vontade de fumar?</div>
+      <div class="panic-section">
+        <button class="panic-btn" onclick="openPanic()">
+          <span class="panic-icon">🆘</span>
+          <span>BOTÃO DE<br>PÂNICO</span>
+        </button>
+        <p style="font-size:12px; color:var(--text-secondary); margin-top:12px;">Pressione se sentir fissura intensa</p>
+      </div>
+    </div>
+
+    <!-- Ajuda profissional -->
+    <a class="contact-item" href="https://www.google.com/maps/search/clinica+autoajuda+em+sorocaba/@-23.4975402,-47.4802645,15z?entry=ttu&g_ep=EgoyMDI2MDUxNy4wIKXMDSoASAFQAw%3D%3D" target="_blank" style="text-decoration:none; color:inherit; display:flex; align-items:center; justify-content:space-between;">
+      <div class="contact-left">
+        <div class="contact-icon">🌐</div>
+        <div>
+          <div class="contact-title">Encontre ajuda profissional</div>
+          <div class="contact-sub">Perto de você</div>
+        </div>
+      </div>
+      <svg viewBox="0 0 24 24" width="18" height="18" stroke="var(--text-secondary)" fill="none" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+    </a>
+  </div>
+
+  <!-- NAV -->
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="goTo('screen-dicas'); setNav(this)">
+      <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 017 7c0 3.5-2.5 6-4 7H9c-1.5-1-4-3.5-4-7a7 7 0 017-7z"/><path d="M9 21h6M10 17v1a2 2 0 004 0v-1"/></svg>
+      <span>Dicas</span>
+    </div>
+    <div class="nav-item" onclick="goTo('screen-jogos'); setNav(this)">
+      <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4m-2-2v4M15 12h.01M18 12h.01"/></svg>
+      <span>Jogos</span>
+    </div>
+    <div class="nav-item active" onclick="goTo('screen-home'); setNav(this)">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+      <span>Home</span>
+    </div>
+    <div class="nav-item" onclick="goTo('screen-metas'); setNav(this)">
+      <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+      <span>Metas</span>
+    </div>
+    <div class="nav-item" onclick="goTo('screen-ajuda'); setNav(this)">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span>Ajuda</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN: METAS ===================== -->
+<div class="screen" id="screen-metas">
+  <div class="header">
+    <div class="header-inner">
+      <div class="header-back" onclick="goTo('screen-home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        Voltar
+      </div>
+      <h1 style="font-size:24px;">Suas Metas</h1>
+      <p>Faça metas para superar sua dependência</p>
+    </div>
+    <div class="header-wave"></div>
+  </div>
+  <div class="content content-with-nav">
+    <!-- Meta atual -->
+    <div class="card">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+        <span style="font-size:18px;">🏁</span>
+        <span style="font-weight:700; font-size:16px;">Meta Atual</span>
+      </div>
+      <div style="font-size:14px; font-weight:600; margin-bottom:8px;">30 dias sem fumar</div>
+      <div class="progress-wrap"><div class="progress-fill" style="width:83%;"></div></div>
+      <div class="progress-label">25 / 30</div>
+      <div style="margin-top:12px;">
+        <button class="btn btn-danger btn-sm" style="width:auto;" onclick="confirmReset()">↺ Resetar</button>
+      </div>
+    </div>
+
+    <!-- Nova meta -->
+    <button class="btn" style="margin-bottom:14px;" onclick="goTo('screen-nova-meta')">＋ Nova Meta</button>
+
+    <!-- Histórico -->
+    <div class="section-title">Suas Metas</div>
+    <div class="meta-status meta-green">
+      <span style="font-size:18px;">✅</span>
+      <div>
+        <div style="font-weight:700;">4 dias sem fumar</div>
+        <div style="font-size:12px; opacity:0.85;">Concluída</div>
+      </div>
+    </div>
+    <div class="meta-status meta-orange">
+      <span style="font-size:18px;">💛</span>
+      <div>
+        <div style="font-weight:700;">Próxima meta</div>
+        <div style="font-size:12px; opacity:0.85;">7 dias sem fumar</div>
+      </div>
+    </div>
+    <div class="meta-status meta-purple">
+      <span style="font-size:18px;">🎉</span>
+      <div>
+        <div style="font-weight:700;">Parabéns!</div>
+        <div style="font-size:12px; opacity:0.85;">Você já evitou 15 cigarros.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="goTo('screen-dicas'); setNav(this)"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 017 7c0 3.5-2.5 6-4 7H9c-1.5-1-4-3.5-4-7a7 7 0 017-7z"/><path d="M9 21h6M10 17v1a2 2 0 004 0v-1"/></svg><span>Dicas</span></div>
+    <div class="nav-item" onclick="goTo('screen-jogos'); setNav(this)"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4m-2-2v4M15 12h.01M18 12h.01"/></svg><span>Jogos</span></div>
+    <div class="nav-item" onclick="goTo('screen-home'); setNav(this)"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><span>Home</span></div>
+    <div class="nav-item active" onclick="goTo('screen-metas'); setNav(this)"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg><span>Metas</span></div>
+    <div class="nav-item" onclick="goTo('screen-ajuda'); setNav(this)"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Ajuda</span></div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN: NOVA META ===================== -->
+<div class="screen" id="screen-nova-meta">
+  <div class="header">
+    <div class="header-inner">
+      <div class="header-back" onclick="goTo('screen-metas')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        Voltar
+      </div>
+      <h1 style="font-size:24px;">Nova Meta</h1>
+      <p>Escolha um novo desafio para superar o fumo</p>
+    </div>
+    <div class="header-wave"></div>
+  </div>
+  <div class="content">
+    <div class="goal-option" onclick="selectGoal(this,'3 dias sem fumar')">
+      <span>3 Dias sem fumar</span>
+      <span class="icon">📅</span>
+    </div>
+    <div class="goal-option" onclick="selectGoal(this,'7 dias sem fumar')">
+      <span>7 Dias sem fumar</span>
+      <span class="icon">🌱</span>
+    </div>
+    <div class="goal-option" onclick="selectGoal(this,'15 dias sem fumar')">
+      <span>15 Dias sem fumar</span>
+      <span class="icon">🔥</span>
+    </div>
+    <div class="goal-option" onclick="selectGoal(this,'30 dias sem fumar')">
+      <span>30 Dias sem fumar</span>
+      <span class="icon">🏅</span>
+    </div>
+    <div style="margin-top:10px; padding:14px; background:var(--purple-light); border-radius:14px;">
+      <p style="font-size:13px; color:var(--purple); text-align:center;">Ou crie uma meta personalizada abaixo</p>
+      <div style="margin-top:10px;" class="input-group"><input type="number" placeholder="Número de dias" min="1"></div>
+    </div>
+    <div style="margin-top:16px;">
+      <button class="btn" onclick="goTo('screen-metas')">＋ Nova Meta</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN: DICAS ===================== -->
+<div class="screen" id="screen-dicas">
+  <div class="header">
+    <div class="header-inner">
+      <div class="header-back" onclick="goTo('screen-home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        Voltar
+      </div>
+      <h1 style="font-size:24px;">Dicas Saudáveis</h1>
+      <p>Faça escolhas corretas para o seu dia a dia</p>
+    </div>
+    <div class="header-wave"></div>
+  </div>
+  <div class="content content-with-nav">
+    <!-- Dica do dia -->
+    <div class="card" style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7); border-color:#BBF7D0;">
+      <div style="display:flex; align-items:center; gap:6px; margin-bottom:10px;">
+        <span>🌿</span>
+        <span style="font-size:12px; font-weight:700; color:#166534; text-transform:uppercase; letter-spacing:0.5px;">Dica do Dia</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <p style="font-size:15px; font-weight:700; color:#166534; margin-bottom:4px;">Beba água quando sentir<br>vontade de fumar.</p>
+          <p style="font-size:12px; color:#166534; opacity:0.75;">Ajuda a reduzir a ansiedade.</p>
+        </div>
+        <span style="font-size:36px;">🫗</span>
+      </div>
+    </div>
+
+    <div class="section-title">Sentindo vontade?</div>
+    <div class="tip-grid">
+      <div class="tip-item" onclick="openBreathing()">
+        <div class="tip-icon">🌊</div>
+        <div class="tip-label">Respiração guiada</div>
+        <div class="tip-sub">2 min</div>
+      </div>
+      <div class="tip-item">
+        <div class="tip-icon">🍎</div>
+        <div class="tip-label">Substitutos saudáveis</div>
+      </div>
+      <div class="tip-item">
+        <div class="tip-icon">🚶</div>
+        <div class="tip-label">Levante e caminhe</div>
+      </div>
+      <div class="tip-item" onclick="goTo('screen-jogos')">
+        <div class="tip-icon">🎮</div>
+        <div class="tip-label">Distrair com jogos</div>
+      </div>
+    </div>
+
+    <div class="section-title">Cuide do seu corpo</div>
+    <div class="tip-grid">
+      <div class="tip-item">
+        <div class="tip-icon">💧</div>
+        <div class="tip-label">Beber água regularmente</div>
+      </div>
+      <div class="tip-item">
+        <div class="tip-icon">🥗</div>
+        <div class="tip-label">Alimentação leve</div>
+      </div>
+      <div class="tip-item">
+        <div class="tip-icon">😴</div>
+        <div class="tip-label">Dormir sempre bem</div>
+      </div>
+      <div class="tip-item">
+        <div class="tip-icon">🏃</div>
+        <div class="tip-label">Exercício todos os dias</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item active" onclick="goTo('screen-dicas'); setNav(this)"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 017 7c0 3.5-2.5 6-4 7H9c-1.5-1-4-3.5-4-7a7 7 0 017-7z"/><path d="M9 21h6M10 17v1a2 2 0 004 0v-1"/></svg><span>Dicas</span></div>
+    <div class="nav-item" onclick="goTo('screen-jogos'); setNav(this)"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4m-2-2v4M15 12h.01M18 12h.01"/></svg><span>Jogos</span></div>
+    <div class="nav-item" onclick="goTo('screen-home'); setNav(this)"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><span>Home</span></div>
+    <div class="nav-item" onclick="goTo('screen-metas'); setNav(this)"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg><span>Metas</span></div>
+    <div class="nav-item" onclick="goTo('screen-ajuda'); setNav(this)"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Ajuda</span></div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN: AJUDA ===================== -->
+<div class="screen" id="screen-ajuda">
+  <div class="header">
+    <div class="header-inner">
+      <div class="header-back" onclick="goTo('screen-home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        Voltar
+      </div>
+      <h1 style="font-size:24px;">Procure Ajuda</h1>
+      <p>Localize ajuda mais perto e mais rápido de você</p>
+    </div>
+    <div class="header-wave"></div>
+  </div>
+  <div class="content content-with-nav">
+    <!-- CTA -->
+    <div class="card" style="background:var(--purple-light); border-color:var(--purple-mid); display:flex; gap:14px; align-items:flex-start;">
+      <span style="font-size:28px;">💬</span>
+      <div>
+        <div style="font-size:15px; font-weight:700; color:var(--purple); margin-bottom:4px;">Precisa conversar?</div>
+        <div style="font-size:13px; color:var(--text-secondary);">Você é mais forte que isso, procure ajuda!</div>
+      </div>
+    </div>
+
+    <div class="section-title">Contatos Rápidos</div>
+    <div class="contact-item">
+      <div class="contact-left">
+        <div class="contact-icon" style="background:#DCFCE7;">📞</div>
+        <div>
+          <div class="contact-title">Ligar 136 (SUS)</div>
+          <div class="contact-sub">Informações sobre tratamento gratuito</div>
+        </div>
+      </div>
+      <svg viewBox="0 0 24 24" width="18" height="18" stroke="var(--text-secondary)" fill="none" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+    </div>
+    <a class="contact-item" href="https://www.google.com/maps/search/clinica+autoajuda+em+sorocaba/@-23.4975402,-47.4802645,15z?entry=ttu&g_ep=EgoyMDI2MDUxNy4wIKXMDSoASAFQAw%3D%3D" target="_blank" style="text-decoration:none; color:inherit; display:flex; align-items:center; justify-content:space-between;">
+      <div class="contact-left">
+        <div class="contact-icon" style="background:#FEF3C7;">🏥</div>
+        <div>
+          <div class="contact-title">Unidade de Saúde próxima</div>
+          <div class="contact-sub">Encontre ajuda presencial</div>
+        </div>
+      </div>
+      <svg viewBox="0 0 24 24" width="18" height="18" stroke="var(--text-secondary)" fill="none" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+    </a>
+    <div class="contact-item">
+      <div class="contact-left">
+        <div class="contact-icon" style="background:#DCFCE7;">💬</div>
+        <div>
+          <div class="contact-title">WhatsApp de apoio</div>
+          <div class="contact-sub">Atendimento com especialistas</div>
+        </div>
+      </div>
+      <svg viewBox="0 0 24 24" width="18" height="18" stroke="var(--text-secondary)" fill="none" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+    </div>
+
+    <div class="section-title">Onde encontrar ajuda</div>
+    <div class="tip-grid">
+      <a class="tip-item" href="https://www.google.com/maps/search/clinica+autoajuda+em+sorocaba/@-23.4975402,-47.4802645,15z?entry=ttu&g_ep=EgoyMDI2MDUxNy4wIKXMDSoASAFQAw%3D%3D" target="_blank" style="text-decoration:none; color:inherit;">
+        <div class="tip-icon">🏛️</div>
+        <div class="tip-label">Programa do SUS</div>
+        <div class="tip-sub">Tratamento gratuito + acompanhamento</div>
+      </a>
+      <a class="tip-item" href="https://www.google.com/maps/search/clinica+autoajuda+em+sorocaba/@-23.4975402,-47.4802645,15z?entry=ttu&g_ep=EgoyMDI2MDUxNy4wIKXMDSoASAFQAw%3D%3D" target="_blank" style="text-decoration:none; color:inherit;">
+        <div class="tip-icon">👥</div>
+        <div class="tip-label">Grupos de apoio</div>
+        <div class="tip-sub">Conversar com pessoas na mesma fase</div>
+      </a>
+      <div class="tip-item">
+        <div class="tip-icon">📱</div>
+        <div class="tip-label">WhatsApp de apoio</div>
+        <div class="tip-sub">Atendimento com especialistas</div>
+      </div>
+      <a class="tip-item" href="https://www.google.com/maps/search/clinica+autoajuda+em+sorocaba/@-23.4975402,-47.4802645,15z?entry=ttu&g_ep=EgoyMDI2MDUxNy4wIKXMDSoASAFQAw%3D%3D" target="_blank" style="text-decoration:none; color:inherit;">
+        <div class="tip-icon">📚</div>
+        <div class="tip-label">Conteúdos para parar de fumar</div>
+        <div class="tip-sub">Dicas oficiais + orientação</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="goTo('screen-dicas'); setNav(this)"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 017 7c0 3.5-2.5 6-4 7H9c-1.5-1-4-3.5-4-7a7 7 0 017-7z"/><path d="M9 21h6M10 17v1a2 2 0 004 0v-1"/></svg><span>Dicas</span></div>
+    <div class="nav-item" onclick="goTo('screen-jogos'); setNav(this)"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4m-2-2v4M15 12h.01M18 12h.01"/></svg><span>Jogos</span></div>
+    <div class="nav-item" onclick="goTo('screen-home'); setNav(this)"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><span>Home</span></div>
+    <div class="nav-item" onclick="goTo('screen-metas'); setNav(this)"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg><span>Metas</span></div>
+    <div class="nav-item active" onclick="goTo('screen-ajuda'); setNav(this)"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Ajuda</span></div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN: JOGOS ===================== -->
+<div class="screen" id="screen-jogos">
+  <div class="header">
+    <div class="header-inner">
+      <div class="header-back" onclick="goTo('screen-home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        Voltar
+      </div>
+      <h1 style="font-size:24px;">Jogos</h1>
+      <p>Escolha um jogo para relaxar e distrair</p>
+    </div>
+    <div class="header-wave"></div>
+  </div>
+  <div class="content content-with-nav">
+    <!-- Pontos -->
+    <div class="card">
+      <div class="points-wrap">
+        <div>
+          <div style="font-size:12px; color:var(--text-secondary); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:2px;">Seus Pontos</div>
+          <div class="points-num">1.200 pts</div>
+        </div>
+        <div style="text-align:right;">
+          <span class="points-crown">👑</span>
+          <div style="font-size:12px; color:var(--text-secondary);">Meta semanal: 2.500</div>
+        </div>
+      </div>
+      <div class="progress-wrap"><div class="progress-fill" style="width:48%;"></div></div>
+      <div style="display:flex; justify-content:space-between; margin-top:4px;">
+        <span style="font-size:11px; color:var(--text-secondary);">1.200 / 2.500</span>
+        <span style="font-size:11px; color:var(--purple); font-weight:600;">+10 pts por jogo</span>
+      </div>
+    </div>
+
+    <!-- Lista de jogos -->
+    <div class="game-item" onclick="openGame('quebra')">
+      <div class="game-left">
+        <div class="game-icon">🧩</div>
+        <div class="game-info">
+          <div class="game-name">Quebra-Cabeça</div>
+          <div class="game-desc">Monte e complete seu quebra-cabeça</div>
+          <div style="margin-top:6px;"><div class="progress-wrap" style="width:120px; display:inline-block;"><div class="progress-fill" style="width:25%;"></div></div> <span style="font-size:11px; color:var(--text-secondary);">6/24 peças</span></div>
+        </div>
+      </div>
+      <span class="game-points">+10</span>
+    </div>
+    <div class="game-item" onclick="openGame('memoria')">
+      <div class="game-left">
+        <div class="game-icon">🃏</div>
+        <div class="game-info">
+          <div class="game-name">Jogo da Memória</div>
+          <div class="game-desc">Vire as cartas e encontre os pares</div>
+          <div style="margin-top:6px;"><div class="progress-wrap" style="width:120px; display:inline-block;"><div class="progress-fill" style="width:0%;"></div></div> <span style="font-size:11px; color:var(--text-secondary);">0/10 pares</span></div>
+        </div>
+      </div>
+      <span class="game-points">+10</span>
+    </div>
+    <div class="game-item" style="opacity:0.5;">
+      <div class="game-left">
+        <div class="game-icon">♟️</div>
+        <div class="game-info">
+          <div class="game-name">Xadrez</div>
+          <div class="game-desc">Derrote oponentes no xadrez</div>
+          <div style="margin-top:6px;"><span style="font-size:11px; background:var(--purple-light); color:var(--purple); padding:2px 8px; border-radius:99px; font-weight:600;">Em breve</span></div>
+        </div>
+      </div>
+      <span class="game-points">+10</span>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="goTo('screen-dicas'); setNav(this)"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 017 7c0 3.5-2.5 6-4 7H9c-1.5-1-4-3.5-4-7a7 7 0 017-7z"/><path d="M9 21h6M10 17v1a2 2 0 004 0v-1"/></svg><span>Dicas</span></div>
+    <div class="nav-item active" onclick="goTo('screen-jogos'); setNav(this)"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4m-2-2v4M15 12h.01M18 12h.01"/></svg><span>Jogos</span></div>
+    <div class="nav-item" onclick="goTo('screen-home'); setNav(this)"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><span>Home</span></div>
+    <div class="nav-item" onclick="goTo('screen-metas'); setNav(this)"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg><span>Metas</span></div>
+    <div class="nav-item" onclick="goTo('screen-ajuda'); setNav(this)"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>Ajuda</span></div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN: JOGO MEMÓRIA ===================== -->
+<div class="screen" id="screen-memoria">
+  <div class="header">
+    <div class="header-inner">
+      <div class="header-back" onclick="goTo('screen-jogos')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        Voltar
+      </div>
+      <h1 style="font-size:24px;">Jogo da Memória</h1>
+      <p>Encontre todos os pares!</p>
+    </div>
+    <div class="header-wave"></div>
+  </div>
+  <div class="content">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <div class="badge badge-purple">Pares: <span id="pairs-found">0</span>/8</div>
+      <div class="badge badge-orange">Tentativas: <span id="attempts">0</span></div>
+    </div>
+    <div id="memory-grid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px;"></div>
+    <div style="margin-top:20px;">
+      <button class="btn btn-outline" onclick="initMemory()">↺ Reiniciar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SCREEN: ONG PAINEL ===================== -->
+<div class="screen" id="screen-ong">
+  <div class="header">
+    <div class="header-inner">
+      <div class="header-back" onclick="goTo('screen-home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        Voltar
+      </div>
+      <h1 style="font-size:24px;">Painel ONG</h1>
+      <p>Acompanhe o progresso dos seus pacientes</p>
+    </div>
+    <div class="header-wave"></div>
+  </div>
+  <div class="content">
+    <!-- Resumo geral -->
+    <div class="card">
+      <div class="card-title">Resumo Geral</div>
+      <div class="ong-stats">
+        <div class="ong-stat">
+          <div class="num">24</div>
+          <div class="lbl">Pacientes ativos</div>
+        </div>
+        <div class="ong-stat">
+          <div class="num">71%</div>
+          <div class="lbl">Em progresso</div>
+        </div>
+        <div class="ong-stat">
+          <div class="num">8</div>
+          <div class="lbl">Metas concluídas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pacientes -->
+    <div class="section-title">Pacientes</div>
+    <div class="ong-card">
+      <div class="ong-header">
+        <div>
+          <div class="ong-name">João Silva</div>
+          <div style="font-size:12px; color:var(--text-secondary);">Cadastrado há 30 dias</div>
+        </div>
+        <span class="badge badge-green">✅ Meta ativa</span>
+      </div>
+      <div style="font-size:13px; color:var(--text-secondary); margin-bottom:6px;">30 dias sem fumar</div>
+      <div class="progress-wrap"><div class="progress-fill" style="width:83%;"></div></div>
+      <div class="progress-label">25/30</div>
+    </div>
+    <div class="ong-card">
+      <div class="ong-header">
+        <div>
+          <div class="ong-name">Maria Oliveira</div>
+          <div style="font-size:12px; color:var(--text-secondary);">Cadastrada há 15 dias</div>
+        </div>
+        <span class="badge badge-orange">🔄 Em progresso</span>
+      </div>
+      <div style="font-size:13px; color:var(--text-secondary); margin-bottom:6px;">7 dias sem fumar</div>
+      <div class="progress-wrap"><div class="progress-fill" style="width:57%;"></div></div>
+      <div class="progress-label">4/7</div>
+    </div>
+    <div class="ong-card">
+      <div class="ong-header">
+        <div>
+          <div class="ong-name">Carlos Mendes</div>
+          <div style="font-size:12px; color:var(--text-secondary);">Cadastrado há 45 dias</div>
+        </div>
+        <span class="badge badge-purple">🏁 3 metas concluídas</span>
+      </div>
+      <div style="font-size:13px; color:var(--text-secondary); margin-bottom:6px;">15 dias sem fumar</div>
+      <div class="progress-wrap"><div class="progress-fill" style="width:100%;"></div></div>
+      <div class="progress-label">15/15 ✅</div>
+    </div>
+    <div class="ong-card">
+      <div class="ong-header">
+        <div>
+          <div class="ong-name">Ana Costa</div>
+          <div style="font-size:12px; color:var(--text-secondary);">Cadastrada há 5 dias</div>
+        </div>
+        <span class="badge badge-orange" style="background:#FEE2E2; color:#991B1B;">⚠️ Atenção</span>
+      </div>
+      <div style="font-size:13px; color:var(--text-secondary); margin-bottom:6px;">3 dias sem fumar</div>
+      <div class="progress-wrap"><div class="progress-fill" style="width:33%;"></div></div>
+      <div class="progress-label">1/3</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODALS ===================== -->
+
+<!-- PÂNICO -->
+<div class="modal-overlay" id="modal-panic">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div style="text-align:center; margin-bottom:16px; font-size:40px;">🧘</div>
+    <div class="modal-title" style="text-align:center;">Respire. Você consegue.</div>
+    <div class="modal-sub" style="text-align:center;">A fissura passa em 3 a 5 minutos. Vamos te ajudar agora.</div>
+    <div class="breath-circle" id="breath-txt">Inspire</div>
+    <p style="text-align:center; font-size:12px; color:var(--text-secondary); margin-bottom:20px;">Siga o ritmo da animação</p>
+    <button class="btn" style="margin-bottom:10px;" onclick="closePanic(); goTo('screen-dicas')">Ver dicas de alívio</button>
+    <button class="btn btn-outline" onclick="closePanic(); window.open('https://www.google.com/maps/search/clinica+autoajuda+em+sorocaba/@-23.4975402,-47.4802645,15z?entry=ttu&g_ep=EgoyMDI2MDUxNy4wIKXMDSoASAFQAw%3D%3D', '_blank')">Falar com alguém</button>
+    <button onclick="closePanic()" style="display:block; width:100%; background:none; border:none; color:var(--text-secondary); font-size:13px; margin-top:12px; cursor:pointer;">Fechar</button>
+  </div>
+</div>
+
+<!-- RESET CONFIRMAR -->
+<div class="modal-overlay" id="modal-reset">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div style="text-align:center; font-size:40px; margin-bottom:16px;">⚠️</div>
+    <div class="modal-title" style="text-align:center;">Resetar sua meta?</div>
+    <div class="modal-sub" style="text-align:center;">Isso irá zerar seu progresso atual. Tem certeza?</div>
+    <button class="btn btn-danger" style="margin-bottom:10px;" onclick="closeModal('modal-reset')">Sim, resetar</button>
+    <button class="btn btn-outline" onclick="closeModal('modal-reset')">Cancelar</button>
+  </div>
+</div>
+
+<!-- RESPIRAÇÃO -->
+<div class="modal-overlay" id="modal-breath">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="text-align:center;">Respiração Guiada</div>
+    <div class="modal-sub" style="text-align:center;">Inspire pelo nariz por 4 segundos, segure por 4, expire pela boca por 4.</div>
+    <div class="breath-circle">Inspire</div>
+    <p style="text-align:center; font-size:12px; color:var(--text-secondary); margin: 12px 0 20px;">Siga o ritmo da animação</p>
+    <button class="btn" onclick="closeModal('modal-breath')">Concluir</button>
+  </div>
+</div>
+
+<!-- META SELECIONADA -->
+<div class="modal-overlay" id="modal-goal">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div style="text-align:center; font-size:40px; margin-bottom:12px;">🎯</div>
+    <div class="modal-title" style="text-align:center;" id="modal-goal-title">Meta definida!</div>
+    <div class="modal-sub" style="text-align:center;">Sua nova meta foi salva. Bora lá!</div>
+    <button class="btn" onclick="closeModal('modal-goal'); goTo('screen-metas')">Ver minhas metas</button>
+  </div>
+</div>
+
+<!-- VITÓRIA MEMÓRIA -->
+<div class="modal-overlay" id="modal-win">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <div style="text-align:center; font-size:48px; margin-bottom:12px;">🏆</div>
+    <div class="modal-title" style="text-align:center;">Você completou!</div>
+    <div class="modal-sub" style="text-align:center;">+10 pontos adicionados ao seu perfil. Continue assim!</div>
+    <button class="btn" style="margin-bottom:10px;" onclick="closeModal('modal-win'); initMemory()">Jogar novamente</button>
+    <button class="btn btn-outline" onclick="closeModal('modal-win'); goTo('screen-jogos')">Voltar aos jogos</button>
+  </div>
+</div>
+
+</div><!-- /phone -->
+
+<script>
+// ---- NAVIGATION ----
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'screen-memoria') initMemory();
+}
+
+function setNav(el) {
+  el.closest('.bottom-nav').querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ---- MODALS ----
+function openPanic() { document.getElementById('modal-panic').classList.add('open'); }
+function closePanic() { document.getElementById('modal-panic').classList.remove('open'); }
+function openBreathing() { document.getElementById('modal-breath').classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function confirmReset() { document.getElementById('modal-reset').classList.add('open'); }
+
+function selectGoal(el, name) {
+  document.querySelectorAll('.goal-option').forEach(g => g.style.borderColor = '');
+  el.style.borderColor = 'var(--purple)';
+  document.getElementById('modal-goal-title').textContent = '🎯 Meta: ' + name;
+  setTimeout(() => document.getElementById('modal-goal').classList.add('open'), 200);
+}
+
+// ---- BREATHING LABEL ----
+const breathLabels = ['Inspire', 'Segure', 'Expire', 'Segure'];
+let breathIdx = 0;
+setInterval(() => {
+  breathIdx = (breathIdx + 1) % breathLabels.length;
+  document.querySelectorAll('.breath-circle').forEach(b => b.textContent = breathLabels[breathIdx]);
+}, 2000);
+
+// ---- MEMORY GAME ----
+const emojis = ['🌿','💧','🍎','🏃','😴','🌊','🎮','🧩'];
+let cards = [], flipped = [], matched = 0, attempts = 0, locked = false;
+
+function initMemory() {
+  const all = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+  cards = []; flipped = []; matched = 0; attempts = 0; locked = false;
+  document.getElementById('pairs-found').textContent = '0';
+  document.getElementById('attempts').textContent = '0';
+  const grid = document.getElementById('memory-grid');
+  grid.innerHTML = '';
+  all.forEach((emoji, i) => {
+    const card = document.createElement('div');
+    card.style.cssText = `aspect-ratio:1; background:var(--purple-light); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:28px; cursor:pointer; border:2px solid var(--border); transition:all 0.3s; user-select:none;`;
+    card.dataset.emoji = emoji;
+    card.dataset.idx = i;
+    card.textContent = '❓';
+    card.addEventListener('click', () => flipCard(card));
+    grid.appendChild(card);
+    cards.push(card);
+  });
+}
+
+function flipCard(card) {
+  if (locked || flipped.includes(card) || card.dataset.matched) return;
+  card.textContent = card.dataset.emoji;
+  card.style.background = 'var(--white)';
+  card.style.borderColor = 'var(--purple)';
+  flipped.push(card);
+  if (flipped.length === 2) {
+    locked = true; attempts++;
+    document.getElementById('attempts').textContent = attempts;
+    if (flipped[0].dataset.emoji === flipped[1].dataset.emoji) {
+      flipped.forEach(c => { c.dataset.matched = true; c.style.background = '#DCFCE7'; c.style.borderColor = 'var(--green)'; });
+      matched++;
+      document.getElementById('pairs-found').textContent = matched;
+      flipped = []; locked = false;
+      if (matched === emojis.length) setTimeout(() => document.getElementById('modal-win').classList.add('open'), 400);
+    } else {
+      setTimeout(() => {
+        flipped.forEach(c => { c.textContent = '❓'; c.style.background = 'var(--purple-light)'; c.style.borderColor = 'var(--border)'; });
+        flipped = []; locked = false;
+      }, 900);
+    }
+  }
+}
+
+function openGame(g) {
+  if (g === 'memoria') goTo('screen-memoria');
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+</script>
+</body>
+</html>
